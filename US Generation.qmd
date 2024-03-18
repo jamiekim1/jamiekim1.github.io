@@ -1,0 +1,269 @@
+---
+title: "US Generation"
+author: 
+  - "Jamie Kim"
+date: "04/10/2023"
+output: html_document 
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(RTLedu)
+library(tidyverse)
+library(lubridate)
+library(patchwork)
+library(kableExtra)
+library(gt)
+```
+
+```{r Data Frame Collection, echo=FALSE, warning=FALSE}
+df <- RTL::eia2tidy_all(tickers = tibble::tribble(~ticker, ~name,
+                                                   "TOTAL.ELETPUS.M", "Total_Generation",
+                                                   "TOTAL.CLETPUS.M", "Coal",
+                                                   "TOTAL.HVETPUS.M", "Hydroelectric",
+                                                   "TOTAL.NGETPUS.M", "Natural_Gas",
+                                                   "TOTAL.NUETPUS.M", "Nuclear",
+                                                   "TOTAL.SOETPUS.M", "Solar",
+                                                   "TOTAL.WYETPUS.M", "Wind"),
+                                                   key = "b4Of9y6cGeI42KfR3Ydl8seplJ0YqMtYW9QydqMk",
+                                                   long = FALSE) %>% 
+  dplyr::filter(date >= as.Date("2009-01-01"))
+```
+
+```{r Data Frame Manipulation, echo=FALSE, warning=FALSE}
+usGen <- df %>% 
+  dplyr::arrange(date) %>% 
+  dplyr::mutate(Year = year(date)) %>% 
+  dplyr::group_by(Year) %>% 
+  dplyr::summarise(Yearly_Generation = sum(Total_Generation)) %>% 
+  dplyr::filter(Year <= 2022)
+
+long <- pivot_longer(data = df,
+                    cols = c(Total_Generation, Coal, Hydroelectric, Natural_Gas, Nuclear, Solar, Wind),
+                    names_to = "Sources",
+                    values_to = "Values")
+
+```
+
+<div style="text-align: center;">
+## **Summary**
+</div>
+
+- Electricity generation has slightly grown from 2009 - 2023.
+- Electricity generation from coal has significantly decreased while natural gas, solar, and wind have been replacing it
+- The share and growth of wind and solar generation has drastically increased
+- Total generation has 4 pivotal moments when the trend shifts. Solar generation peaks around summer and wind generation climbs around fall and peaks during the spring.
+
+***
+<div style="text-align: center;">
+### **Electricity Generation Growth**
+</div>
+
+Electricity generation has experienced slow growth, approximately 7.4%, over the past 14 years. Yearly electricity generation was considered to account for and smooth out the seasonality in electricity generation. Since there isn't a full year of data for 2023, it was taken out to ensure consistency.
+
+<div style="text-align: center;">
+```{r Is_electricity_generation_growing_or_decreasing, echo=FALSE, message=FALSE, warning=FALSE}
+
+electricity <- usGen %>%
+  dplyr::select(Year, Yearly_Generation) %>% 
+  ggplot(data = usGen,
+         mapping = aes(x = Year,
+                       y = Yearly_Generation)) +
+  geom_line() +
+  stat_smooth(method = "lm", se = FALSE) +
+  labs(title = "Yearly Electricity Generation",
+       y = "Electricity Generated (Thousand Mwh)")
+  
+electricity
+```
+</div>
+
+***
+<div style="text-align: center;">
+### **Coal Generation and the Sources Replacing it**
+</div>
+
+As the US implements climate policies and transitions towards less carbon-intensive electricity generation,
+the use of coal as a source of power generation has experienced a rapid decline from 2009 to 2023.
+
+<div style="text-align: center;">
+```{r Coal_Graph, echo=FALSE, message=FALSE, warning=FALSE}
+p1 <- long %>% 
+  dplyr::filter(Sources == "Coal") %>% 
+  ggplot(mapping = aes(x = date,
+                       y = Values)) +
+  geom_line() +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years") +
+  labs(title = "Electricity Generated from Coal",
+       y = "Electricity Generated (Thousand Mwh)",
+       x = "Year") +
+  geom_smooth(method = "lm", se = FALSE)
+p1
+```
+</div>
+
+As a result of these policies, the US has increased its reliance on Natural Gas, Solar, and Wind to generate their electricity. Although natural gas is a fossil fuel, it emits fewer carbon emissions compared to coal.
+
+<div style="text-align: center;">
+```{r Sources_Replacing_Coal, echo=FALSE, message=FALSE, warning=FALSE}
+p.wrap <- long %>%
+  dplyr::filter(Sources %in% c("Solar", "Wind", "Natural_Gas", "date")) %>% 
+  ggplot(aes(x = date, 
+             y = Values,
+             col = Sources)) +
+  geom_line() +
+  facet_wrap(Sources ~ .,
+             ncol = 1,
+             scales = "free") +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years") +
+  geom_smooth(method = "lm", se = FALSE, size = 0.25) +
+  labs(title = "Sources Replacing Coal",
+       y = "Electricity Generated (Thousand Mwh)",
+       x = "Year")
+p.wrap
+```
+</div>
+
+On the contrary, Hydroelectricity and Nuclear energy have stayed relatively stable as a source of electricity.
+
+<div style="text-align: center;">
+```{r Hydroelectricity_and_Nuclear_Graph, echo=FALSE, message=FALSE, warning=FALSE}
+p.wrap2 <- long %>%
+  dplyr::filter(Sources %in% c("Nuclear", "Hydroelectric", "date")) %>% 
+  ggplot(aes(x = date, 
+             y = Values,
+             col = Sources)) +
+  geom_line() +
+  facet_wrap(Sources ~ .,
+             ncol = 1,
+             scales = "free") +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years") +
+  geom_smooth(method = "lm", se = FALSE, size = 0.25) +
+  labs(y = "Electricity Generated (Thousand Mwh)",
+       x = "Year")
+
+p.wrap2
+```
+</div>
+
+***
+<div style="text-align: center;">
+### **Share and Growth of Wind and Solar Generation**
+</div>
+
+The generation of solar and wind power has experienced substantial growth between 2009 and 2023. Solar energy now accounts for nearly 5% of the total electricity generation, a remarkable increase from its previous share of just 0.03%. Additionally, wind power contributes approximately 14% to the total electricity generation, marking a significant rise from its previous 2.5% share.
+
+<div style="text-align: center;">
+```{r Share_and_Growth_of_Wind_Solar, echo=FALSE, message=FALSE, warning=FALSE}
+share_growth <- df %>%
+  dplyr::select(-Coal, -Natural_Gas, -Hydroelectric, -Nuclear) %>%
+  dplyr::arrange(date) %>% 
+  dplyr::mutate(Wind_Share = (Wind / Total_Generation) * 100, 
+                Solar_Share = (Solar / Total_Generation) * 100) %>% 
+  dplyr::mutate(Monthly_Solar_Change = c(NA, diff(Solar)),
+                Monthly_Wind_Change = c(NA, diff(Wind)))
+
+share <- share_growth %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = Solar_Share, color = "Solar Share")) +
+  geom_line(aes(y = Wind_Share, color = "Wind Share")) +
+  scale_color_manual(values = c("Solar Share" = "yellow", "Wind Share" = "blue")) +
+  theme(panel.background = element_rect(fill = "gray")) +
+  labs(title = "Share of Wind and Solar Generation", 
+       y = "Share of Total Generated (%)",
+       x = "Year") +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years")
+
+change <- long %>% 
+  dplyr::mutate(Month = month(date)) %>% 
+  dplyr::mutate(Year = year(date)) %>% 
+  dplyr::filter(Sources %in% c("Coal", "Solar", "Wind", "Natural_Gas", "Month", "Year")) %>% 
+  dplyr::group_by(Month, Sources, Year) %>% 
+  dplyr::summarise(Monthly_Generation = sum(Values)) %>% 
+  dplyr::filter(Month == 1) %>% 
+  dplyr::filter(Year == 2009 | Year == 2023) %>% 
+  pivot_wider(names_from = Year,
+              values_from = Monthly_Generation) %>% 
+  dplyr::rename(Year_2009 = "2009",
+                Year_2023 = "2023") %>% 
+  dplyr::mutate(Growth = (Year_2023 - Year_2009) / Year_2009) %>% 
+  dplyr::mutate(Growth = sprintf("%.2f%%", Growth * 100)) %>% 
+  dplyr::ungroup(Month) %>% 
+  dplyr::select(-Month) %>% 
+  kbl(caption = "Growth of Generation Sources",
+      col.names = c("Sources", "2009-01", "2023-01", "Growth")) %>% 
+  kable_classic(full_width = F, html_font = "Cambria") %>% 
+  row_spec(2, color = "red") %>% 
+  row_spec(3, color = "green") %>% 
+  row_spec(4, color = "blue")
+
+change
+plotly::ggplotly(share)
+
+```
+</div>
+
+***
+<div style="text-align: center;">
+### **Periodic Patterns in Total, Wind, and Solar Generation**
+
+#### **Total Generation Patterns**
+</div>
+
+The most influential factor affecting electricity generation is its seasonality, and there are four pivotal moments in the total generation where the trend undergoes changes:
+
+1. Summer Peak: Demand peaks during the summer as longer daylight hours and need for air conditioning means more energy use
+2. Fall Decrease: Temperatures begin to drop, reducing need for air conditioning. Shorter daylight hours means less energy use
+3. Winter Increase: Low temperatures result in need for heating as well as the holiday season increases decorative lighting and energy use.
+4. Spring Low: Temperatures begin to rise again reducing need for heating but not enough to warrant air conditioning, leading to lowest demand for energy.
+
+We can also see the effect of the COVID-19 pandemic on generation as it hit an all time low in 2020. This historic decline was a consequence of the pandemic's ripple effects, including an economic deceleration, diminished commercial operations, constraints on travel, and disruptions in supply chains.
+
+<div style="text-align: center;">
+```{r Total_Generation_Graph, echo=FALSE, message=FALSE, warning=FALSE}
+total <- df %>% 
+  dplyr::select(date, Total_Generation) %>% 
+  ggplot(aes(x = date,
+             y = Total_Generation)) +
+  geom_line() +
+  labs(title = "Total Generation in the US (Monthly)",
+       x = "Year",
+       y = "Electricity Generated (Thousand Mwh)") +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years")
+
+plotly::ggplotly(total)
+```
+</div>
+
+<div style="text-align: center;">
+#### **Solar and Wind Generation Patterns**
+</div>
+
+Solar generation is directly affected by the amount of sunlight available. As a result, peak generation occurs between May - August (longer days, shorter nights) while lowest generation occurs between November - February (shorter days, longer nights).\
+
+Wind generation is directly affected by the wind patterns. Wind generation climbs during the fall and peaks during the end of winter/beginning of spring where winds are the most consistent. Lowest generation occurs during the summer season when winds are the least consistent.\
+
+There is a negative correlation of generation between solar and wind. Solar generation peaks during the summer while wind generation is at its lowest (vice versa).
+
+<div style="text-align: center;">
+```{r Solar_Wind_Generation, echo=FALSE, message=FALSE, warning=FALSE}
+solar_wind <- long %>% 
+  dplyr::filter(Sources %in% c("Solar", "Wind", "date")) %>% 
+  ggplot(aes(x = date, 
+             y = Values,
+             col = Sources)) +
+  geom_line() +
+  facet_wrap(Sources ~ .,
+             ncol = 1,
+             scales = "free") +
+  scale_x_date(date_labels = "%Y", date_breaks = "3 years") +
+  labs(title = "Solar and Wind Generation",
+       y = "Electricity",
+       x = "Year")
+
+plotly::ggplotly(solar_wind)
+```
+</div>
