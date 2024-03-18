@@ -1,5 +1,5 @@
 ---
-title: "Assessing Fitness with Strava Data"
+title: "Fitness Data"
 author: "Jamie Kim"
 date: "2023-10-18"
 format: 
