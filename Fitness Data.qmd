@@ -1,0 +1,275 @@
+---
+title: "Assessing Fitness with Strava Data"
+author: "Jamie Kim"
+date: "2023-10-18"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(RTLedu)
+library(patchwork)
+library(kableExtra)
+library(broom)
+library(hexbin)
+```
+
+```{r Cleaning Data, echo=FALSE, message=FALSE, warning=FALSE}
+df <- RTLedu::strava %>% 
+  dplyr::select(-Avg.Vertical.Ratio, -Avg.Vertical.Oscillation, -Avg.Ground.Contact.Time, -Training.Stress.Score., -Avg.Power, -Max.Power, -Flow, -Avg..Swolf, -Avg.Stroke.Rate, -Dive.Time, -Surface.Interval, -Favorite, -Decompression, -Min.Resp, -Max.Resp, -Avg.Resp, -Time,-Min.Elevation, -Max.Elevation, -Max.Temp, -Min.Temp, -Best.Lap.Time, -Number.of.Laps) %>% 
+  dplyr::mutate(Avg.HR = as.numeric(Avg.HR),
+                Max.HR = as.numeric(Max.HR),
+                Aerobic.TE = as.numeric(Aerobic.TE),
+                Avg.Run.Cadence = as.numeric(Avg.Run.Cadence),
+                Max.Run.Cadence = as.numeric(Max.Run.Cadence),
+                Total.Ascent = as.numeric(Total.Ascent),
+                Total.Descent = as.numeric(Total.Ascent),
+                Avg.Pace = ifelse(Runner == "Collie", round(((as.numeric(Avg.Pace) / 60) / 60), 2), round(sapply(strsplit(Avg.Pace, ":"), function(x) as.numeric(x[1]) + as.numeric(x[2]) / 60), 2)),
+                Best.Pace = round(as.numeric((Best.Pace) / 60) / 60, 2),
+                Distance = round(ifelse(Distance > 100, Distance / 1000,
+                                  Distance), 2), 
+                Elapsed.Time = round(as.numeric(Elapsed.Time) / 60, 2), 
+                Moving.Time = round(as.numeric(Moving.Time) / 60, 2),
+                Avg.Speed = Distance / (Elapsed.Time / 60),
+                Run.Type = dplyr::case_when(Elapsed.Time >= 45 ~ "Long",
+                                            TRUE ~ "Short"),
+                Moving.Ratio = ifelse(Moving.Time == 0, NA, Moving.Time / Elapsed.Time),
+                Avg.Stride.Length = ifelse(Avg.Stride.Length == 0, NA, Avg.Stride.Length)
+                )
+
+hound_data <- df %>% 
+  dplyr::filter(Runner == "Hound") %>% 
+  dplyr::group_by(Date) %>% 
+  dplyr::summarise(Distance = sum(Distance),
+                   Calories = sum(Calories),
+                   Avg.HR = round(mean(Avg.HR), 2),
+                   Max.HR = round(mean(Max.HR), 2),
+                   Aerobic.TE = round(mean(Aerobic.TE), 2),
+                   Avg.Run.Cadence = round(mean(Avg.Run.Cadence), 2),
+                   Max.Run.Cadence = round(mean(Max.Run.Cadence), 2),
+                   Avg.Pace = round(mean(Avg.Pace), 2),
+                   Best.Pace = round(mean(Best.Pace), 2),
+                   Total.Ascent = sum(Total.Ascent),
+                   Total.Descent = sum(Total.Descent),
+                   Avg.Stride.Length = round(mean(Avg.Stride.Length), 2),
+                   Elapsed.Time = sum(Elapsed.Time),
+                   Avg.Speed = round(mean(Avg.Speed), 2),
+                   Moving.Ratio = round(mean(Moving.Ratio), 2),
+                   Run.Type = Run.Type) %>% 
+  dplyr::ungroup(Date) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(Date >= as.Date("2020-01-01"))
+
+collie_data <- df %>% 
+  dplyr::filter(Runner == "Collie")
+
+```
+
+::: {style="text-align: center;"}
+## **Summary**
+:::
+
+1.  Fitness is defined as the ability to achieve a given distance, pace, speed, and time with greater ease and reduced cardiovascular effort.
+2.  Collie is "fitter" under our definition.
+3.  Hound has improved more in fitness.
+4.  Hound is the ideal coaching candidate.
+
+------------------------------------------------------------------------
+
+::: {style="text-align: center;"}
+### **Fitness Defined**
+:::
+
+> Fitness is a multi-faceted concept that varies greatly from person to person. Under the context of running, fitness is defined as the ability to achieve a given distance, pace, speed, and time with greater ease and reduced cardiovascular effort. It is important to note that fitness is influenced by various factors such as genetics, training history, training goals, nutrition, and lifestyle. For the sake of this analysis, we will assume both runners are equal in every quality and will strictly base the analysis on the given data.
+
+------------------------------------------------------------------------
+
+::: {style="text-align: center;"}
+### **Fitness Comparisons**
+:::
+
+> Upon analyzing the average performance metrics of both runners, it becomes apparent that, according to our definition, Collie is "fitter". Collie maintains a lower average heart rate across both types of runs while simultaneously upholding a faster pace and greater speed.
+
+> It's worth noting that when specifically examining the "Long" run category in terms of time and distance, Hound's performance closely rivals that of Collie. This observation suggests that Hound specializes in endurance running and primarily focuses on this aspect, which stands in contrast to Collie's emphasis on higher-intensity training.
+
+```{r Which_Individual_is_Fitter, echo=FALSE, message=FALSE, warning=FALSE}
+
+stats_hound <- hound_data %>% 
+  dplyr::group_by(Run.Type) %>% 
+  dplyr::summarise(Avg_Pace_M_KM = round(mean(Avg.Pace), 2),
+                   Avg_Distance_KM = round(mean(Distance), 2),
+                   Avg_HR = round(mean(Avg.HR), 2),
+                   Avg_Speed_KM_H = round(mean(Avg.Speed), 2),
+                   Avg_Time_M = round(mean(Elapsed.Time), 2)) %>% 
+  kbl(caption = "Running Averages for Hound",
+      col.names = c("Run Type", "Pace (mins/Km)", "Distance (Km)", "HR", "Speed (Km/h)", "Avg_Time (mins)")) %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+stats_collie <- collie_data %>% 
+  dplyr::group_by(Run.Type) %>% 
+  dplyr::summarise(Avg_Pace_M_KM = round(mean(Avg.Pace), 2),
+                   Avg_Distance_KM = round(mean(Distance), 2),
+                   Avg_HR = round(mean(Avg.HR), 2),
+                   Avg_Speed_KM_H = round(mean(Avg.Speed), 2),
+                   Avg_Time_M = round(mean(Elapsed.Time), 2)) %>% 
+  kbl(caption = "Running Averages for Collie",
+      col.names = c("Run Type", "Pace (mins/Km)", "Distance (Km)", "HR", "Speed (Km/h)", "Avg_Time (mins)")) %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+stats_hound
+stats_collie
+
+```
+
+------------------------------------------------------------------------
+
+::: {style="text-align: center;"}
+### **Analyzing Fitness Improvement**
+:::
+
+> Based on the analysis, Hound has improved significantly more than Collie. Hound's average speed has improved more relative to Collie. There is a strong negative relationship between speed and pace, with a notable R-squared value of 0.9 when regressing speed over pace. We can safely say that Hound's average pace has also improved more without visualizing it.
+
+::: {style="text-align: center;"}
+```{r speed_over_time_comparison, echo=FALSE, message=FALSE, warning=FALSE}
+
+hound_slope_speed <- coef(lm(Avg.Speed ~ Date, data = hound_data))[2]
+collie_slope_speed <- coef(lm(Avg.Speed ~ Date, data = collie_data))[2]
+
+fit <- stats::lm(Avg.Speed ~ Avg.Pace, data = df)
+regression <- coef(summary(fit))
+table <- table <- kable(
+  regression,
+  caption = "Regression of Speed on Pace"
+) %>%
+  kable_styling(full_width = FALSE)
+table
+
+hound_speed_time <- hound_data %>% 
+  ggplot(mapping = aes(x = Date,
+                       y = Avg.Speed)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) + 
+  labs(title = "Avg Speed Over Time",
+       subtitle = paste("Hound (Slope:", round(hound_slope_speed, 5), ")"))
+
+collie_speed_time <- collie_data %>% 
+  ggplot(mapping = aes(x = Date,
+                       y = Avg.Speed)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) + 
+  labs(title = "Avg Speed Over Time",
+       subtitle = paste("Collie (Slope:", round(collie_slope_speed, 5), ")"))
+
+hound_speed_time | collie_speed_time
+
+```
+:::
+
+> Stride length is an important factor in determining running efficiency, influencing how effectively an individual covers distance and conserves energy while running. A longer stride length allows runners to cover more ground with each step, reducing the number of steps required to traverse a specific distance. Hound's average stride length has improved drastically over time relative to Collie.
+
+::: {style="text-align: center;"}
+```{r stride_over_time_comparison, echo=FALSE, message=FALSE, warning=FALSE}
+
+hound_slope_stride <- coef(lm(Avg.Stride.Length ~ Date, data = hound_data))[2]
+collie_slope_stride <- coef(lm(Avg.Stride.Length ~ Date, data = collie_data))[2]
+
+hound_stride_time <- hound_data %>% 
+  ggplot(mapping = aes(x = Date,
+                       y = Avg.Stride.Length)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) + 
+  labs(title = "Avg Stride Over Time",
+       subtitle = paste("Hound (Slope:", round(hound_slope_stride, 5), ")"))
+
+collie_stride_time <- collie_data %>% 
+  ggplot(mapping = aes(x = Date,
+                       y = Avg.Stride.Length)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) + 
+  labs(title = "Avg Stride Over Time",
+       subtitle = paste("Collie (Slope:", round(collie_slope_stride, 5), ")"))
+
+hound_stride_time | collie_stride_time
+
+```
+:::
+
+------------------------------------------------------------------------
+
+::: {style="text-align: center;"}
+### **Choosing the Ideal Coaching Candidate**
+:::
+
+> Choosing the right coaching candidate is not about who the "better" runner is, but rather who possesses the ideal blend of dedication, coachability, and untapped potential for growth. With consideration of the analysis below, Hound seems to be the ideal coaching candidate.
+
+> Taking the previous analysis into account, it becomes evident that Hound has shown greater improvement in comparison to Collie. This improvement signifies that Hound holds a higher potential for growth.
+
+> When examining their running patterns, it is clear that Hound introduces more variety in their training regimen. They engage in a mix of both short and long-distance runs throughout the year, displaying a consistent level of commitment irrespective of the season. In contrast, Collie tends to focus predominantly on shorter distances, with longer runs being infrequent and only occurring during the summer season.
+
+::: {style="text-align: center;"}
+```{r Violin_Plot_Season_Distance, echo=FALSE, message=FALSE, warning=FALSE}
+
+hound_violin <- hound_data %>% 
+  dplyr::filter(Date >= as.Date("2021-01-01") & Date <= as.Date("2022-12-31")) %>%
+  dplyr::mutate(Season = case_when(
+    month(Date) %in% c(12, 1, 2) ~ "Winter",
+    month(Date) %in% c(3, 4, 5) ~ "Spring",
+    month(Date) %in% c(6, 7, 8) ~ "Summer",
+    TRUE ~ "Autumn")) %>% 
+  ggplot(aes(x = Season, y = Distance, fill = Season)) +
+  geom_violin() +
+  labs(x = "Season",
+       y = "Distance Run",
+       title = "Distance Run by Season",
+       subtitle = "Hound: 2021 - 2022") +
+ theme(legend.position = "none")
+
+collie_violin <- collie_data %>% 
+  dplyr::filter(Date >= as.Date("2021-01-01") & Date <= as.Date("2022-12-31")) %>%
+  dplyr::mutate(Season = case_when(
+    month(Date) %in% c(12, 1, 2) ~ "Winter",
+    month(Date) %in% c(3, 4, 5) ~ "Spring",
+    month(Date) %in% c(6, 7, 8) ~ "Summer",
+    TRUE ~ "Autumn")) %>% 
+  ggplot(aes(x = Season, y = Distance, fill = Season)) +
+  geom_violin() +
+  labs(x = "Season",
+       y = "Distance Run",
+       title = "Distance Run by Season",
+       subtitle = "Collie: 2021 - 2022") +
+ theme(legend.position = "none")
+
+hound_violin | collie_violin
+
+```
+:::
+
+> Aerobic Training Effect measures how a run impacts your overall fitness and endurance. A higher Aerobic TE indicates a more intense workout. Considering the graphs below, it's clear that Hound's training is well-structured and deliberate. Hound follows a training concept called periodization, which involves cycling through various training intensities over time. In Hound's case, they begin with lower-intensity training and gradually shift to higher intensity as time progresses. In contrast, Collie's training appears less structured and lacks a noticeable pattern. Collie however, does appear to train more often at higher intensities.
+
+::: {style="text-align: center;"}
+```{r aerobic_te_comparison, echo=FALSE, message=FALSE, warning=FALSE}
+
+hound_te <- hound_data %>% 
+  ggplot(aes(x = Date,
+             y = Aerobic.TE)) +
+  geom_hex() + 
+  scale_fill_distiller(palette = "Spectral") +
+  labs(title = "Aerobic TE by Date",
+       subtitle = "Runner: Hound")
+
+collie_te <- collie_data %>% 
+  ggplot(aes(x = Date,
+             y = Aerobic.TE)) +
+  geom_hex() + 
+  scale_fill_distiller(palette = "Spectral") +
+  labs(title = "Aerobic TE by Date",
+       subtitle = "Runner: Collie")
+
+hound_te
+collie_te
+
+```
+:::
