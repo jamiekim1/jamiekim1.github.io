@@ -9,6 +9,7 @@ website:
       - href: index.qmd
         text: Home
       - US Generation.qmd
+      - Fitness Data.qmd
 
 format:
   html:
