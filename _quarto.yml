@@ -12,6 +12,8 @@ website:
         text: US Generation
       - href: Fitness Data.qmd
         text: Fitness Data
+      - href: Exploring the World of Cinema.qmd
+        text: Exploring the World of Cinema
 
 format:
   html:

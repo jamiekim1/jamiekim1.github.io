@@ -26,5 +26,82 @@
     "title": "Assessing Fitness with Strava Data",
     "section": "",
     "text": "Running Averages for Hound\n\n\nRun Type\nPace (mins/Km)\nDistance (Km)\nHR\nSpeed (Km/h)\nAvg_Time (mins)\n\n\n\n\nLong\n6.44\n12.56\n146.07\n9.50\n80.47\n\n\nShort\n6.63\n5.14\n148.49\n9.45\n32.07\n\n\n\n\n\n\n\n\nRunning Averages for Collie\n\n\nRun Type\nPace (mins/Km)\nDistance (Km)\nHR\nSpeed (Km/h)\nAvg_Time (mins)\n\n\n\n\nLong\n5.21\n11.57\n143.96\n11.48\n61.11\n\n\nShort\n5.25\n6.55\n143.99\n11.39\n34.52"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html",
+    "href": "Exploring the World of Cinema.html",
+    "title": "Exploring The World of Cinema",
+    "section": "",
+    "text": "In this report, we will explore the various factors that impact and influence the monetary success of a movie at the box office. Our investigation extends beyond mere fiscal considerations, encompassing a nuanced analysis of important factors such as the cast and crew. By scrutinizing these diverse components, this report aims to provide a comprehensive understanding of the factors that defines a movie’s monetary success at the box office and ultimately provide a framework for users to increase earning potential for their films.\nThe data was obtained through the use of our own web scraping algorithm and covers the top 75 grossing movies over the past 25 years.\nOver time, the average revenue demonstrates a distinct upward trend, with a notable observation regarding the rate of growth in Foreign revenue compared to Domestic revenue. The surge in global revenue is primarily driven by the rapid expansion of foreign revenue, highlighting the escalating growth and acceptance of Western films in international markets.\nThe Covid-19 Pandemic notably affected the film industry, seen in the graph. Production halts, theater closures, and global lockdowns resulted in significant revenue loss. Disruptions in filming schedules, release delays, and the closure of theaters impacted filmmakers, actors, crew members, distributors, and exhibitors. This vulnerability to external shocks highlighted the necessity for innovative adaptations, including online releases, to navigate challenges.\nThe film release month significantly impacts revenue, with May and June consistently outperforming. Analysis of variance (ANOVA) reveals a notable disparity. Key factors include:\nSummer Blockbuster Season: May and June align with the summer movie season, featuring high-budget blockbusters. Studios strategically target a broad audience, capitalizing on warmer weather and vacations.\nStrategic Release Patterns: Acknowledging this trend, the industry strategically releases popular films during these months, leveraging heightened audience engagement.\nGenre Preferences: Genres like action and adventure dominate May and June releases, drawing larger audiences and contributing to higher revenue. (Median Revenue adjusts for outliers)\nA significant annual seasonality, quantified at 0.5817723, is evident in average revenue. This recurring pattern implies consistent trends in revenue throughout the year. Recognizing and leveraging this seasonality is crucial for strategic decision-making in film releases.\nPractically, it urges a closer look at revenue distribution over the year. Exploring which months or seasons contribute significantly to high or low average revenues can inform release strategies, marketing efforts, and resource allocation.\nUndoubtedly, a film’s budget stands as the biggest influencer of its success, controlling most aspects of production. A substantial financial backing allows for elevated production values, sophisticated marketing strategies, and the recruitment of established talent, all crucial elements that contribute to a film’s overall quality and marketability. This dynamic relationship is graphically portrayed by the slope of the regression line, emphasizing the large influence of budget and the multifaceted components shaping a film’s trajectory.\nOver the course of cinematic history, there has been a gradual and discernible increase in the average run time of films. Films also tend to do better the longer they are. However, the difference isn’t as drastic between short and medium length films. Films were split into the following categories:\nFilms carrying an “R” rating exhibit a significant decrease in average revenue, aligning with the overarching understanding that “R” rated movies cater to a comparatively smaller demographic, thus potentially limiting their market reach. This distinctive trend highlights the impact of content restrictions on audience accessibility and the subsequent financial performance of a film.\nThe influence of a film distributor on its earning potential is a pivotal factor in the cinematic landscape. One standout performer in this realm is Walt Disney Studios Motion Pictures, demonstrating a consistent track record of increasing the revenue of the films distributed over time. This commendable trend not only positions Disney as a powerhouse in film distribution but also emphasizes the strategic vision and market awareness that the studio brings to the table.\nThe genre of a film is a crucial aspect that defines its style, tone, and overall artistic expression. It serves as a blueprint, giving audiences a general idea of what to expect and helping filmmakers convey their vision effectively. The genre serves as a crucial component in the marketing and promotion of a film. It helps studios target specific demographics and tailor promotional campaigns to reach the intended audience.\nThe chart highlights Sci-Fi and Adventure as the most lucrative film genres, mainly due to numerous blockbuster titles. Despite outliers, the consistent trend indicates widespread favoritism, reinforcing these genres as leading contributors to the film industry’s financial success.\nUpon analyzing the revenue distributions across genres, a notable observation emerged: the box plots for the Fantasy and Family genres exhibited remarkable similarity. This observation prompted a deeper exploration into the correlations among various genre combinations.\nA noteworthy finding was the high positive correlation between the Animation and Family genres. This correlation aligns seamlessly with the prevalent trend of animated family-oriented films. Conversely, an intriguing insight surfaced when examining the negative correlation between Thriller and Comedy genres. This distinctive relationship suggests an unconventional pairing that has not been extensively explored in the cinematic landscape.\nThis negative correlation sparks a thought-provoking notion — the potential for an innovative and revolutionary genre combination. The rarity of Thriller-Comedy hybrids in the current cinematic landscape presents an opportunity for filmmakers to experiment. This unexplored territory not only provides creative potential but also introduces the possibility of captivating a diverse audience with a novel cinematic experience.\nMovies often navigate across various genres to broaden their appeal and cater to a diverse demographic. The trend indicates that a film’s performance tends to improve as it incorporates multiple genres, with the optimal balance appearing to be around six genres.\nThe composition of the cast is a crucial factor in the success of a film, where actors have the ability to either propel or hinder its success. While the quantification of an actor’s precise impact on a film’s success may pose a challenge, delving into the data reveals enlightening insights.\nThere appears to be a shift in audience preferences. The audience, while still embracing the familiarity of established actors, demonstrates a growing affinity for emerging talents. This graph also reveals the audience is now forging connections with a new cohort of actors who have become their own “regulars.”\nWhen seeking the ideal star for an upcoming film, Robert Downey Jr. or Chris Pratt stands out. Both actors have established themselves as powerhouses of the new cohort of actors.\nThe crew is the backbone of the production process for a film. There exists a prevailing assumption that a larger crew equates to a more successful production—a notion that holds true for certain professions but conversely defies expectations for others. All else being equal:\nNote that heteroscedasticity exists in our data set which raises concerns about the reliability of certain statistical inferences.\nBuilding upon the insights gained from our prior information and analysis, we will employ diverse workflow models for predictive analytics. The objective is to ascertain the global box office revenue projections for upcoming, yet-to-be-released movies.\nThe model’s performance metrics suggest suboptimal accuracy in predicting test set revenue. The mean absolute error (MAE) averages around 132 million, signifying notable deviations from actual values. Additionally, the R-squared value indicates that our factors explain only about 20% of the actual values. To explore model limitations, we’ll focus on outliers, identifying areas where the model struggles for potential enhancements. The plot below depicts the connection between residuals and actual values, highlighting instances of significant prediction deviations.\nThe chart suggests outliers in predictions, particularly in high-revenue areas.\nNow, let’s analyze residuals, focusing on budget—the most influential factor. We’ll set “close” and “bad” thresholds for estimates, emphasizing inclusivity. Using budget, a key predictor, a boxplot highlights where our estimates succeed (budget ~ $50 million) and where they struggle (budget &gt; $150 million), possibly due to the complexity of higher-budget films with additional influencing factors.\nFollowing adjustments made according to error analysis and the exclusion of films with budget values below $125,000,000, a notable enhancement in our model’s predictive accuracy becomes apparent. More precisely, the model has achieved a significant improvement in Mean Percentage Error (MPE) by roughly 28%. Furthermore, there is an observed increase of approximately 8% in R-squared, providing additional support to the notion that films with higher budgets exhibit a more complex interplay of variables influencing their revenue."
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#project-framework-definition-and-methodology",
+    "href": "Exploring the World of Cinema.html#project-framework-definition-and-methodology",
+    "title": "Exploring The World of Cinema",
+    "section": "Project Framework: Definition and Methodology",
+    "text": "Project Framework: Definition and Methodology"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#limitations",
+    "href": "Exploring the World of Cinema.html#limitations",
+    "title": "Exploring The World of Cinema",
+    "section": "Limitations",
+    "text": "Limitations"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#temporal-analysis",
+    "href": "Exploring the World of Cinema.html#temporal-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Temporal Analysis",
+    "text": "Temporal Analysis"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#film-characteristics-and-insights",
+    "href": "Exploring the World of Cinema.html#film-characteristics-and-insights",
+    "title": "Exploring The World of Cinema",
+    "section": "Film Characteristics and Insights",
+    "text": "Film Characteristics and Insights"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#cast-crew-analysis",
+    "href": "Exploring the World of Cinema.html#cast-crew-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Cast & Crew Analysis",
+    "text": "Cast & Crew Analysis"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#predictive-analysis",
+    "href": "Exploring the World of Cinema.html#predictive-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Predictive Analysis",
+    "text": "Predictive Analysis"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#regression-tree-analysis",
+    "href": "Exploring the World of Cinema.html#regression-tree-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Regression Tree Analysis",
+    "text": "Regression Tree Analysis\nHere, our aim is to train a model for utilizing a regression tree to forecast the global revenue of an upcoming release. In our preceding analysis, we established some influencing factors which we will incorporate to help the model perform.\nIn the subsequent analysis, we made a deliberate effort to incorporate these noteworthy elements, encompassing budget, distributor, release month, MPAA rating, runtime in minutes, the primary genre, and the count of genres.\nBefore examining the tree, let’s delve into how the model assigns importance to predictor variables. Unsurprisingly, budget emerges as the top indicator of movie revenue, succeeded by release month, distributor, and other variables. This analysis underscores the notion that the count of genres does indeed influence release revenue.\n\n\n\n\n\n\n\nFollowing the construction and training of our model, we partitioned the dataset into two segments: 80% for training and 20% for testing. A training iteration facilitated the application of our recently trained model to conduct a predictive analysis on the worldwide revenue of all films within our designated test set. The model adhered to the decision tree criteria, and the accuracy of its predictions is quantified and documented through metrics such as RMSE, RSQ, and MAE.\nBelow is the visualization of our decision tree and model performance metrics after running our test set.\n\n\n\n\n\n\n\nModel Performance Metrics\n\n\n.metric\n.estimator\n.estimate\n\n\n\n\nrmse\nstandard\n2.103495e+08\n\n\nrsq\nstandard\n2.969080e-01\n\n\nmae\nstandard\n1.309467e+08"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#error-analysis",
+    "href": "Exploring the World of Cinema.html#error-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Error Analysis",
+    "text": "Error Analysis"
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#opportunities-for-further-analysis",
+    "href": "Exploring the World of Cinema.html#opportunities-for-further-analysis",
+    "title": "Exploring The World of Cinema",
+    "section": "Opportunities for Further Analysis",
+    "text": "Opportunities for Further Analysis\nNow that we have analysed the errors of our models we can easily observe that to improve the model even further we would have tackle the higher budget films where our predictions are failing. A potential approach that could be taken here to find variables that are influencing the revenue of these moves could be a Principal Component Analysis. By conducting this analysis we could gain further insights into possible underlying factors that seem to impact these films."
+  },
+  {
+    "objectID": "Exploring the World of Cinema.html#conclusion",
+    "href": "Exploring the World of Cinema.html#conclusion",
+    "title": "Exploring The World of Cinema",
+    "section": "Conclusion",
+    "text": "Conclusion\nIn conclusion, our comprehensive analysis of various factors influencing box office success has unearthed valuable insights for the film industry. From temporal trends to influential characteristics, our exploration provides a nuanced understanding that can guide decision-makers in the dynamic landscape of filmmaking.\nOur predictive analysis, though revealing suboptimal accuracy, demonstrated the potential for improvement. Error analysis led to adjustments and exclusions, resulting in a notable enhancement in the model’s predictive accuracy. The findings highlight the complexity of variables influencing revenue, with a particular emphasis on the challenges presented by higher budget films.\nAs the film industry continues to evolve, adaptability and informed decision-making become paramount. This analysis equips industry professionals with valuable insights, offering a roadmap for navigating the complexities of filmmaking, maximizing revenue potential, and fostering success in an ever-changing landscape."
   }
 ]
