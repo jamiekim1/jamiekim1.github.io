@@ -8,8 +8,10 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - US Generation.qmd
-      - Fitness Data.qmd
+      - href: US Generation.qmd
+        text: US Generation
+      - href: Fitness Data.qmd
+        text: Fitness Data
 
 format:
   html:
