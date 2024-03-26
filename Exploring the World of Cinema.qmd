@@ -1,6 +1,6 @@
 ---
 title: "Exploring The World of Cinema"
-date: "12/09/2023"
+date: "09/12/2023"
 author:
   - "Jamie Kim"
   - "Noah Eglauer"
